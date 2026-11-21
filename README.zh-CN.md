@@ -14,7 +14,7 @@
 zpm "load /opt/hf-split-ledger"
 ```
 
-   如果配置的 IPM 注册库已发布此包，也可执行 `zpm "install hf-split-ledger"`。
+   如果配置的 IPM 注册库已发布此包，也可执行 `zpm "install hf-split-ledger 1.0.0"`。
 
    也可以手动编译。将仓库挂载到 `/app` 后，在目标命名空间运行以下命令。
 

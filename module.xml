@@ -3,7 +3,7 @@
   <Document name="hf-split-ledger.ZPM">
     <Module>
       <Name>hf-split-ledger</Name>
-      <Version>0.1.0</Version>
+      <Version>1.0.0</Version>
       <Packaging>module</Packaging>
       <Description>Import a public Hugging Face Dataset Viewer split into InterSystems IRIS.</Description>
       <SourcesRoot>src</SourcesRoot>

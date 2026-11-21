@@ -14,7 +14,7 @@ Load a public Hugging Face Dataset Viewer split into InterSystems IRIS with one 
 zpm "load /opt/hf-split-ledger"
 ```
 
-   If your configured registry carries the module, you can also run `zpm "install hf-split-ledger"`.
+   If your configured registry carries the module, you can also run `zpm "install hf-split-ledger 1.0.0"`.
 
    To compile manually, mount the checkout at `/app` and run the following in the target namespace.
 
