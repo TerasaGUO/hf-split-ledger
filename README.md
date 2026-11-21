@@ -6,13 +6,21 @@ Load a public Hugging Face Dataset Viewer split into InterSystems IRIS with one 
 
 ## Run from the IRIS terminal
 
-[HFSplit.Importer](src/HFSplit.Importer.cls) is the ObjectScript implementation. It fetches Viewer pages over HTTPS, validates the JSON, resolves source identities and writes the rows in an IRIS transaction. Existing splits keep their original source keys.
+[HFSplit.Importer](src/HFSplit/Importer.cls) is the ObjectScript implementation. It fetches Viewer pages over HTTPS, validates the JSON, resolves source identities and writes the rows in an IRIS transaction. Existing splits keep their original source keys.
 
-1. Copy or mount this repository where the IRIS instance can read it (for example, `/app`). Compile the class in the application namespace.
+1. Open the target application namespace with [InterSystems Package Manager (IPM)](https://github.com/intersystems/ipm) installed. Copy or mount the checkout on the IRIS host and replace the path below with the directory containing `module.xml`. The installing account needs permission to compile classes in this namespace.
 
 ```objectscript
-set sc=$system.OBJ.Load("/app/src/HFSplit.Importer.cls","ck")
-do $system.Status.DisplayError(sc)
+zpm "load /opt/hf-split-ledger"
+```
+
+   If your configured registry carries the module, you can also run `zpm "install hf-split-ledger"`.
+
+   To compile manually, mount the checkout at `/app` and run the following in the target namespace.
+
+```objectscript
+set sc=$system.OBJ.Load("/app/src/HFSplit/Importer.cls","ck")
+if $system.Status.IsError(sc) do $system.Status.DisplayError(sc)
 ```
 
 2. Configure an IRIS client TLS profile with peer verification. On a clean Linux IRIS 2026.2 container an administrator can create the following profile in the `%SYS` namespace. Use the appropriate trusted CA file on other systems.
@@ -37,7 +45,7 @@ The compatible Python 3.10+ CLI passes its arguments to the ObjectScript class u
 ```sh
 python3 -m venv .venv
 . .venv/bin/activate
-python -m pip install -r requirements.txt
+python -m pip install -r requirements-cli.txt
 export IRIS_DSN='localhost:1972/USER'
 export IRIS_USER='your-import-user'
 # Set IRIS_PASSWORD in your shell or secret manager.
@@ -64,7 +72,7 @@ The source must expose complete JSON rows through the public Dataset Viewer API.
 
 ## Verify
 
-In a disposable test namespace, compile the deterministic page fixture. Use the same namespace for the verification commands below.
+In a disposable test namespace, compile the deterministic page fixture from a checkout mounted at `/app` (adjust the path as needed). Use the same namespace for the verification commands below.
 
 ```objectscript
 set sc=$system.OBJ.Load("/app/tests/HFSplitTest.Fixture.cls","ck")

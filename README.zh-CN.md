@@ -6,13 +6,21 @@
 
 ## 从 IRIS 终端运行
 
-核心实现位于 [HFSplit.Importer](src/HFSplit.Importer.cls)。ObjectScript 负责向 Hugging Face 发起 HTTPS 请求、逐页验证 JSON、管理来源键并在 IRIS 事务内写入记录。已有分区沿用原来的来源键。
+核心实现位于 [HFSplit.Importer](src/HFSplit/Importer.cls)。ObjectScript 负责向 Hugging Face 发起 HTTPS 请求、逐页验证 JSON、管理来源键并在 IRIS 事务内写入记录。已有分区沿用原来的来源键。
 
-1. 将仓库挂载或复制到 IRIS 实例可读的目录（示例为 `/app`）。在目标命名空间编译类。
+1. 在安装了 [InterSystems Package Manager（IPM）](https://github.com/intersystems/ipm) 的目标应用命名空间运行以下命令。将仓库复制或挂载到 IRIS 主机，并将路径替换为包含 `module.xml` 的目录。安装账号须有权在该命名空间编译类。
 
 ```objectscript
-set sc=$system.OBJ.Load("/app/src/HFSplit.Importer.cls","ck")
-do $system.Status.DisplayError(sc)
+zpm "load /opt/hf-split-ledger"
+```
+
+   如果配置的 IPM 注册库已发布此包，也可执行 `zpm "install hf-split-ledger"`。
+
+   也可以手动编译。将仓库挂载到 `/app` 后，在目标命名空间运行以下命令。
+
+```objectscript
+set sc=$system.OBJ.Load("/app/src/HFSplit/Importer.cls","ck")
+if $system.Status.IsError(sc) do $system.Status.DisplayError(sc)
 ```
 
 2. 准备启用对端证书验证的 IRIS 客户端 TLS 配置。下面是管理员在干净的 Linux IRIS 2026.2 容器的 `%SYS` 命名空间中创建配置的示例。其他系统请指定实际的受信任 CA 文件。
@@ -37,7 +45,7 @@ write ##class(HFSplit.Importer).Import("cornell-movie-review-data/rotten_tomatoe
 ```sh
 python3 -m venv .venv
 . .venv/bin/activate
-python -m pip install -r requirements.txt
+python -m pip install -r requirements-cli.txt
 export IRIS_DSN='localhost:1972/USER'
 export IRIS_USER='your-import-user'
 # Set IRIS_PASSWORD in your shell or secret manager.
@@ -64,7 +72,7 @@ ORDER BY r.SourceRow
 
 ## 验证
 
-在专用测试命名空间中，先编译提供确定性分页响应的测试类，再用相同命名空间的连接配置运行以下命令。
+在专用测试命名空间中，先从挂载在 `/app` 的仓库编译提供确定性分页响应的测试类（请按实际路径调整），再用相同命名空间的连接配置运行以下命令。
 
 ```objectscript
 set sc=$system.OBJ.Load("/app/tests/HFSplitTest.Fixture.cls","ck")
